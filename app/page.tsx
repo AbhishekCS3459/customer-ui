@@ -36,15 +36,12 @@ export default function Page() {
     <header className="today-header">
       <div className="header-main">
         <button className="mobile-menu" aria-label="Open menu" onClick={() => setShowCategories(true)}><Menu size={22} /></button>
-        <div className="today-logo" aria-label="TodayZ home">Today<span>Z</span></div>
-        <button className="deliver"><MapPin size={18} /><span><small>Deliver to</small><strong>India</strong></span></button>
-        <div className="search-bar"><select aria-label="Search category"><option>All</option></select><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search TodayZ" aria-label="Search products" /><button aria-label="Search"><Search size={22} /></button></div>
-        <button className="language">EN <ChevronDown size={12} /></button>
-        <button className="account"><small>Hello, sign in</small><strong>Account & Lists</strong></button>
-        <button className="orders"><small>Returns</small><strong>& Orders</strong></button>
-        <button className="cart" onClick={() => setCart((count) => count + 1)} aria-label={`Cart with ${cart} items`}><ShoppingCart size={29} /><b>{cart}</b><strong>Cart</strong></button>
+        <div className="today-brand"><div className="today-logo" aria-label="TodayZ home">Today<span>Z</span></div><small>shop the everyday</small></div>
+        <button className="deliver"><MapPin size={18} /><span><small>Delivering today</small><strong>India</strong></span></button>
+        <div className="search-bar"><select aria-label="Search category"><option>All items</option></select><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="What are you looking for?" aria-label="Search products" /><button aria-label="Search"><Search size={22} /></button></div>
+        <div className="header-actions"><button className="language">EN <ChevronDown size={12} /></button><button className="account"><small>Welcome back</small><strong>Account</strong></button><button className="orders"><small>Track</small><strong>Orders</strong></button><button className="cart" onClick={() => setCart((count) => count + 1)} aria-label={`Cart with ${cart} items`}><ShoppingCart size={25} /><b>{cart}</b><strong>Bag</strong></button></div>
       </div>
-      <nav className="category-nav"><button onClick={() => setShowCategories(true)}><Menu size={19} /> All</button>{categories.slice(1, 7).map((item) => <button key={item} onClick={() => setCategory(item)}>{item}</button>)}<button>Today's Deals</button><button>Sell</button></nav>
+      <nav className="category-nav"><span className="nav-label">Browse today</span>{categories.slice(1, 7).map((item) => <button key={item} onClick={() => setCategory(item)}>{item}</button>)}<button className="nav-feature" onClick={() => { setCategory('All'); window.scrollTo({ top: 500, behavior: 'smooth' }) }}>Fresh finds <ChevronRight size={15} /></button><button onClick={() => setShowCategories(true)}><Menu size={16} /> More</button></nav>
     </header>
 
     <main>
