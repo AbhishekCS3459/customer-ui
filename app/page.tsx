@@ -33,10 +33,10 @@ export default function Page() {
   }), [category, query])
 
   return <div className="storefront">
-    <header className="amazon-header">
+    <header className="today-header">
       <div className="header-main">
         <button className="mobile-menu" aria-label="Open menu" onClick={() => setShowCategories(true)}><Menu size={22} /></button>
-        <div className="amazon-logo" aria-label="TodayZ home">Today<span>Z</span></div>
+        <div className="today-logo" aria-label="TodayZ home">Today<span>Z</span></div>
         <button className="deliver"><MapPin size={18} /><span><small>Deliver to</small><strong>India</strong></span></button>
         <div className="search-bar"><select aria-label="Search category"><option>All</option></select><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search TodayZ" aria-label="Search products" /><button aria-label="Search"><Search size={22} /></button></div>
         <button className="language">EN <ChevronDown size={12} /></button>
