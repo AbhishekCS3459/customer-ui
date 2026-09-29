@@ -3,7 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Shoply — Everything you need, delivered',
+  title: 'TodayZ — Everyday products, simply delivered',
   description: 'Discover everyday essentials, electronics, fashion, and more at great prices.',
   generator: 'v0.app',
   icons: {
