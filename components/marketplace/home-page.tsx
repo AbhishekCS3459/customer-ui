@@ -80,6 +80,21 @@ function Browse({ category, area }: { category: string; area?: Area }) {
         <StoreIcon className="pointer-events-none absolute right-10 bottom-4 hidden size-36 text-brand/[0.08] sm:block" aria-hidden />
       </section>
 
+      <div className="mt-5 grid gap-2 sm:grid-cols-3">
+        <div className="rounded-2xl border border-line bg-surface/80 px-4 py-3">
+          <p className="text-xs font-bold tracking-[0.14em] text-brand uppercase">01 · Discover</p>
+          <p className="mt-1 text-sm font-semibold">See what is available nearby</p>
+        </div>
+        <div className="rounded-2xl border border-line bg-surface/80 px-4 py-3">
+          <p className="text-xs font-bold tracking-[0.14em] text-accent uppercase">02 · Compare</p>
+          <p className="mt-1 text-sm font-semibold">Prices from local stores, together</p>
+        </div>
+        <div className="rounded-2xl border border-line bg-surface/80 px-4 py-3">
+          <p className="text-xs font-bold tracking-[0.14em] text-brand uppercase">03 · Choose</p>
+          <p className="mt-1 text-sm font-semibold">Pick the option that works best</p>
+        </div>
+      </div>
+
       {categories && categories.length > 0 && <CategoryChips categories={categories} active={category} />}
 
       {first.error ? (
