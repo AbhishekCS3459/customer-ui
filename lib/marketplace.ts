@@ -6,6 +6,11 @@
 export const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/+$/, '')
 const DEBUG = process.env.NEXT_PUBLIC_MARKETPLACE_DEBUG === 'true'
 
+// Temporary: remove once the deployed backend is confirmed.
+if (typeof window !== 'undefined') {
+  console.info('[customer-ui] BACKEND_URL:', process.env.BACKEND_URL, '| API calls go to:', API_URL || `${window.location.origin}/api (proxied)`)
+}
+
 export type Sort = 'nearest' | 'cheapest' | 'availability'
 export type AvailabilityBucket = 'IN_STOCK' | 'LOW' | 'OUT' | 'CONFIRM_WITH_STORE'
 
