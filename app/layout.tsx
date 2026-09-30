@@ -3,8 +3,8 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'TodayZ — Everyday products, simply delivered',
-  description: 'Discover everyday essentials, electronics, fashion, and more at great prices.',
+  title: 'TodayZ — Find it nearby',
+  description: 'Search a product, compare nearby stores by price, distance and availability, then go and buy.',
   generator: 'v0.app',
   icons: {
     icon: [{ url: '/icon.svg', type: 'image/svg+xml' }],
@@ -13,11 +13,8 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  colorScheme: 'light dark',
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: 'white' },
-    { media: '(prefers-color-scheme: dark)', color: 'black' },
-  ],
+  colorScheme: 'light',
+  themeColor: '#ffffff',
 }
 
 export default function RootLayout({
@@ -27,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased">
+      <body className="bg-canvas text-ink antialiased">
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>

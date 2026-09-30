@@ -10,19 +10,24 @@ This repository is linked to a [v0](https://v0.app) project. You can continue de
 
 ## Getting Started
 
-First, run the development server:
+This is the customer marketplace: search a product near a location, compare
+nearby stores, open a store or a product at a store. It talks to the Find Me
+backend's public `/api/marketplace` endpoints.
+
+1. Start the backend (`make run` in `backend/`).
+2. Optionally `cp .env.example .env.local` to point at another API or turn on debug quantities.
+
+The browser calls `/api/*` on this app, and `next.config.mjs` proxies it to
+`BACKEND_URL`: the local API in `.env.development`, the Azure API
+(`https://find-me-api.azurewebsites.net`, same as retailer-ui) in `.env.production`.
+3. Run the UI:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Open [http://localhost:3002](http://localhost:3002). The default location is
+Koramangala, Bengaluru (12.9352, 77.6245), the marketplace demo seed's test point.
 
 ## Learn More
 

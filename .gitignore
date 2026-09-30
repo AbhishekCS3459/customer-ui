@@ -7,9 +7,15 @@ __v0_jsx-dev-runtime.ts
 .vercel/
 
 # Environment variables
-.env*.local
+.env*
+!.env*.example
+# Non-secret per-mode defaults (BACKEND_URL); keep secrets in .env / .env*.local
+!.env.development
+!.env.production
 
 # Common ignores
 node_modules
 .next/
 .DS_Store
+*.tsbuildinfo
+next-env.d.ts
