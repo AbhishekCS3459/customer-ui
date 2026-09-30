@@ -49,22 +49,35 @@ function Browse({ category, area }: { category: string; area?: Area }) {
 
   return (
     <>
-      <section className="relative overflow-hidden rounded-[28px] bg-linear-to-br from-brand-soft via-[#eef6f0] to-surface px-5 py-7 ring-1 ring-line ring-inset sm:px-10 sm:py-10">
-        <StoreIcon className="pointer-events-none absolute -right-6 -bottom-8 size-44 text-brand/[0.07] sm:size-56" aria-hidden />
-        <p className="text-xs font-bold tracking-[0.18em] text-brand uppercase">{area ? `Near ${areaLabel(area)}` : 'Near you'}</p>
-        <h1 className="mt-2 max-w-xl text-3xl leading-[1.1] font-black tracking-tight sm:text-5xl">
-          Everything nearby, <span className="text-accent">compared.</span>
-        </h1>
-        <p className="mt-3 max-w-lg text-sm text-ink-soft sm:text-base">
-          Products from stores {area ? `within ${formatRadius(area.radiusM)}` : 'around you'}, each with its own price and stock. Pick a
-          store and go.
-        </p>
-        {area && (
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            <span className="text-sm font-medium text-ink-soft">Show stores within</span>
-            <RadiusPicker value={area.radiusM} onChange={(radiusM) => setArea({ ...area, radiusM })} />
+      <section className="relative overflow-hidden rounded-[30px] bg-linear-to-br from-[#e3f2e8] via-[#f4f7ef] to-[#fff8ed] px-5 py-7 ring-1 ring-line ring-inset sm:px-10 sm:py-10">
+        <div className="relative z-10 max-w-2xl">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-bold tracking-[0.16em] text-brand uppercase">
+            <span className="rounded-full bg-surface/80 px-3 py-1.5 ring-1 ring-brand/10">{area ? `Near ${areaLabel(area)}` : 'Your local edit'}</span>
+            <span className="text-ink-faint">Updated just now</span>
           </div>
-        )}
+          <h1 className="mt-5 max-w-2xl text-4xl leading-[1.02] font-black tracking-[-0.04em] sm:text-6xl">
+            Shop smarter, <span className="text-accent">closer to home.</span>
+          </h1>
+          <p className="mt-4 max-w-xl text-sm leading-6 text-ink-soft sm:text-base">
+            Discover what&apos;s in stock at nearby stores, compare prices in one view, and choose the easiest way to get it today.
+          </p>
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <span className="inline-flex items-center gap-2 rounded-full bg-surface px-3.5 py-2 text-xs font-semibold text-ink-soft ring-1 ring-line">
+              <span className="size-2 rounded-full bg-brand" aria-hidden /> Live availability
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full bg-surface px-3.5 py-2 text-xs font-semibold text-ink-soft ring-1 ring-line">
+              <span className="size-2 rounded-full bg-accent" aria-hidden /> Honest local prices
+            </span>
+          </div>
+          {area && (
+            <div className="mt-7 flex flex-wrap items-center gap-3 border-t border-brand/10 pt-5">
+              <span className="text-sm font-semibold text-ink-soft">Search radius</span>
+              <RadiusPicker value={area.radiusM} onChange={(radiusM) => setArea({ ...area, radiusM })} />
+            </div>
+          )}
+        </div>
+        <div className="pointer-events-none absolute -right-8 -bottom-12 hidden size-72 rounded-full border-[28px] border-brand/10 sm:block" aria-hidden />
+        <StoreIcon className="pointer-events-none absolute right-10 bottom-4 hidden size-36 text-brand/[0.08] sm:block" aria-hidden />
       </section>
 
       {categories && categories.length > 0 && <CategoryChips categories={categories} active={category} />}
