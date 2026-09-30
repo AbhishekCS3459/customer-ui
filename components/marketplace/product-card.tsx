@@ -21,6 +21,7 @@ export function ProductCard({ product }: { product: SearchProduct }) {
       <div className="relative">
         <ProductImage src={product.image_url} alt={product.name} className="aspect-square w-full transition group-hover:bg-brand-soft/60" />
         <AvailabilityBadge bucket={bucket} className="absolute top-2 left-2 bg-surface/95" />
+        {storeCount > 1 && <span className="absolute right-2 bottom-2 rounded-full bg-ink/90 px-2 py-1 text-[10px] font-bold text-white">Compare {storeCount}</span>}
       </div>
       <div className="mt-3 flex flex-1 flex-col px-1">
         {product.brand && <p className="truncate text-[11px] font-semibold tracking-wide text-ink-faint uppercase">{product.brand}</p>}

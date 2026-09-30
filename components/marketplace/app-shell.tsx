@@ -31,48 +31,50 @@ function AppHeader({ query = '' }: { query?: string }) {
   }
 
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-surface/90 backdrop-blur-md">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-5 gap-y-3 px-4 py-3 sm:px-6 lg:flex-nowrap">
-        <Link href="/" className="order-1 flex shrink-0 flex-col leading-none" aria-label="TodayZ home">
-          <span className="text-2xl font-black tracking-tight text-ink">
-            Today<span className="text-brand">Z</span>
-          </span>
-          <span className="mt-1 text-[9px] font-bold tracking-[0.2em] text-ink-faint uppercase">Find it nearby</span>
-        </Link>
+    <header className="sticky top-0 z-30 border-b border-line bg-surface/95 backdrop-blur-xl">
+      <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:py-4">
+        <div className="flex items-center gap-3 lg:gap-8">
+          <Link href="/" className="flex shrink-0 flex-col leading-none" aria-label="TodayZ home">
+            <span className="text-[26px] font-black tracking-[-0.06em] text-ink sm:text-3xl">
+              Today<span className="text-brand">Z</span>
+            </span>
+            <span className="mt-1 hidden text-[9px] font-bold tracking-[0.22em] text-ink-faint uppercase sm:block">Shop the everyday</span>
+          </Link>
 
-        <form onSubmit={onSearch} role="search" className="order-3 w-full lg:order-2 lg:w-auto lg:flex-1">
-          <label className="flex h-11 items-center gap-2 rounded-full bg-canvas px-4 ring-1 ring-line transition ring-inset focus-within:bg-surface focus-within:ring-2 focus-within:ring-brand">
-            <Search className="size-4 shrink-0 text-ink-faint" aria-hidden />
-            <input
-              // Remount when the URL's query changes so the box shows it.
-              key={query}
-              name="q"
-              type="search"
-              defaultValue={query}
-              placeholder="Search products or brands, e.g. coke"
-              aria-label="Search products"
-              minLength={MIN_QUERY_LENGTH}
-              maxLength={MAX_QUERY_LENGTH}
-              required
-              className="h-full min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-ink-faint"
-            />
-          </label>
-        </form>
+          <form onSubmit={onSearch} role="search" className="min-w-0 flex-1">
+            <label className="flex h-11 items-center gap-2 rounded-2xl bg-canvas px-3 ring-1 ring-line transition ring-inset focus-within:bg-surface focus-within:ring-2 focus-within:ring-brand sm:h-12 sm:rounded-full sm:px-4">
+              <Search className="size-4 shrink-0 text-brand sm:size-[18px]" aria-hidden />
+              <input
+                key={query}
+                name="q"
+                type="search"
+                defaultValue={query}
+                placeholder="Search products, brands or stores"
+                aria-label="Search products"
+                minLength={MIN_QUERY_LENGTH}
+                maxLength={MAX_QUERY_LENGTH}
+                required
+                className="h-full min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-ink-faint"
+              />
+              <kbd className="hidden rounded-md bg-surface px-2 py-1 text-[10px] font-semibold text-ink-faint ring-1 ring-line sm:block">⌘ K</kbd>
+            </label>
+          </form>
 
-        <button
-          type="button"
-          onClick={() => setLocationOpen(true)}
-          className="order-2 ml-auto flex max-w-[60%] items-center gap-2 rounded-full py-1.5 pr-3 pl-2 text-left transition hover:bg-canvas lg:order-3 lg:ml-0 lg:max-w-xs"
-        >
-          <span className="grid size-8 shrink-0 place-items-center rounded-full bg-brand-soft text-brand">
-            <MapPin className="size-4" aria-hidden />
-          </span>
-          <span className="min-w-0 leading-tight">
-            <span className="block text-[11px] text-ink-faint">{area ? `Within ${formatRadius(area.radiusM)} of` : 'Shopping near'}</span>
-            <span className="block truncate text-sm font-semibold">{area ? areaLabel(area) : '…'}</span>
-          </span>
-          <ChevronDown className="size-4 shrink-0 text-ink-faint" aria-hidden />
-        </button>
+          <button type="button" onClick={() => setLocationOpen(true)} className="group flex shrink-0 items-center gap-2 rounded-2xl p-1.5 text-left transition hover:bg-canvas sm:px-2">
+            <span className="grid size-9 place-items-center rounded-xl bg-brand-soft text-brand"><MapPin className="size-4" aria-hidden /></span>
+            <span className="hidden max-w-36 leading-tight sm:block">
+              <span className="block text-[10px] font-semibold tracking-wide text-ink-faint uppercase">Delivering to</span>
+              <span className="block truncate text-sm font-bold">{area ? areaLabel(area) : 'Choose location'}</span>
+            </span>
+            <ChevronDown className="hidden size-4 text-ink-faint sm:block" aria-hidden />
+          </button>
+        </div>
+        <nav aria-label="Customer shortcuts" className="no-scrollbar mt-3 flex gap-2 overflow-x-auto border-t border-line/70 pt-3 text-xs font-semibold text-ink-soft">
+          <Link href="/" className="shrink-0 rounded-full bg-ink px-3.5 py-2 text-white">Discover</Link>
+          <button type="button" onClick={() => setLocationOpen(true)} className="shrink-0 rounded-full bg-canvas px-3.5 py-2 hover:bg-brand-soft">Nearby stores</button>
+          <span className="shrink-0 rounded-full bg-canvas px-3.5 py-2">Compare prices</span>
+          <span className="shrink-0 rounded-full bg-canvas px-3.5 py-2">Offers today</span>
+        </nav>
       </div>
       {area && <LocationDialog open={locationOpen} onOpenChange={setLocationOpen} area={area} />}
     </header>
