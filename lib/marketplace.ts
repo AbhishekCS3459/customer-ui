@@ -80,6 +80,27 @@ export type Store = {
   vacation_until?: string
 }
 
+export type NearbyStore = Store & {
+  /** The store's kind, e.g. "Pharmacy"; empty when unknown. */
+  category: string
+  distance_m: number
+  cover_image_url?: string
+  /** Products customers can find there; a closed store lists none. */
+  product_count: number
+  /** Of those, the ones not out of stock. */
+  available_count: number
+}
+
+export type NearbyStoresResult = {
+  lat: number
+  lng: number
+  radius_m: number
+  /** Nearest first. */
+  stores: NearbyStore[]
+  /** More stores are within the radius than were returned. */
+  has_more: boolean
+}
+
 export type StoreProduct = Product & {
   store_id: string
   price: number
@@ -98,7 +119,7 @@ export type StoreProductsPage = {
 export const MIN_QUERY_LENGTH = 2
 export const MAX_QUERY_LENGTH = 100
 export const NEARBY_PAGE_SIZE = 30
-export const DEFAULT_RADIUS_M = 2000
+export const DEFAULT_RADIUS_M = 5000
 export const RADIUS_OPTIONS_M = [1000, 2000, 5000, 10000, 20000]
 export const MAX_RADIUS_M = RADIUS_OPTIONS_M[RADIUS_OPTIONS_M.length - 1]
 export const SORTS: { value: Sort; label: string }[] = [
@@ -186,6 +207,11 @@ export function nearbyProductsPath(area: Area, category?: string, cursor?: strin
   if (category) params.set('category', category)
   if (cursor) params.set('cursor', cursor)
   return `/api/marketplace/nearby/products?${params}`
+}
+
+/** Stores within the area, nearest first, closed ones included. */
+export function nearbyStoresPath(area: Area): string {
+  return `/api/marketplace/nearby/stores?${new URLSearchParams({ ...areaParams(area), limit: '100' })}`
 }
 
 export function productPath(catalogKey: string, area: Area, sort: Sort): string {

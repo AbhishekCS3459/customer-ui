@@ -19,6 +19,67 @@
 
   --shadow-card: 0 1px 2px rgb(18 42 31 / 0.04), 0 6px 20px rgb(18 42 31 / 0.05);
   --shadow-lift: 0 2px 4px rgb(18 42 31 / 0.05), 0 14px 32px rgb(18 42 31 / 0.09);
+
+  --animate-pin-drop: pin-drop 520ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-locate-pulse: locate-pulse 2.4s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+  --animate-rise: rise 600ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+
+  @keyframes pin-drop {
+    0% {
+      opacity: 0;
+      transform: translateY(-18px) scale(0.6);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  @keyframes locate-pulse {
+    0% {
+      opacity: 0.55;
+      transform: scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(4.5);
+    }
+  }
+  @keyframes rise {
+    0% {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+.leaflet-container {
+  font-family: var(--font-sans);
+}
+
+/* Muted tiles so the store pins stand out. */
+.tz-map .leaflet-tile-pane {
+  filter: saturate(0.3) brightness(1.05) contrast(0.92);
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 18px;
+  box-shadow: var(--shadow-lift);
+}
+
+.leaflet-popup-content {
+  margin: 12px 14px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pin-drop,
+  .animate-locate-pulse,
+  .animate-rise {
+    animation: none;
+  }
 }
 
 @utility no-scrollbar {

@@ -25,6 +25,7 @@ import {
   searchPath,
 } from '@/lib/marketplace'
 import { PageShell, areaLabel } from './app-shell'
+import { NearbyHero } from './nearby-hero'
 import { ProductCard } from './product-card'
 import { Notice, ProductCardSkeleton, ProductGridSkeleton, RadiusPicker, productGridClass } from './shared'
 
@@ -46,26 +47,12 @@ function Browse({ category, area }: { category: string; area?: Area }) {
   // The previous page stays on screen while a new filter loads, so the chips don't flicker.
   const page = first.data ?? first.previous
   const categories = page ? (page.categories ?? []) : undefined
+  // Every product has one top-level category, so this counts them all whatever the filter.
+  const productTotal = categories?.reduce((total, c) => total + c.product_count, 0)
 
   return (
     <>
-      <section className="relative overflow-hidden rounded-[28px] bg-linear-to-br from-brand-soft via-[#eef6f0] to-surface px-5 py-7 ring-1 ring-line ring-inset sm:px-10 sm:py-10">
-        <StoreIcon className="pointer-events-none absolute -right-6 -bottom-8 size-44 text-brand/[0.07] sm:size-56" aria-hidden />
-        <p className="text-xs font-bold tracking-[0.18em] text-brand uppercase">{area ? `Near ${areaLabel(area)}` : 'Near you'}</p>
-        <h1 className="mt-2 max-w-xl text-3xl leading-[1.1] font-black tracking-tight sm:text-5xl">
-          Everything nearby, <span className="text-accent">compared.</span>
-        </h1>
-        <p className="mt-3 max-w-lg text-sm text-ink-soft sm:text-base">
-          Products from stores {area ? `within ${formatRadius(area.radiusM)}` : 'around you'}, each with its own price and stock. Pick a
-          store and go.
-        </p>
-        {area && (
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            <span className="text-sm font-medium text-ink-soft">Show stores within</span>
-            <RadiusPicker value={area.radiusM} onChange={(radiusM) => setArea({ ...area, radiusM })} />
-          </div>
-        )}
-      </section>
+      <NearbyHero area={area} productTotal={productTotal} />
 
       {categories && categories.length > 0 && <CategoryChips categories={categories} active={category} />}
 
