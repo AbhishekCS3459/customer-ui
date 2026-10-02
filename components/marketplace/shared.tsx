@@ -29,6 +29,20 @@ export function AvailabilityBadge({ bucket, className }: { bucket: AvailabilityB
   )
 }
 
+/** Shown while stock changes arrive on their own. */
+export function LiveIndicator({ connected }: { connected: boolean }) {
+  if (!connected) return null
+  return (
+    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700" title="Stock changes show up here as they happen">
+      <span className="relative flex size-2" aria-hidden>
+        <span className="absolute inline-flex size-full rounded-full bg-emerald-400 opacity-75 motion-safe:animate-ping" />
+        <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+      </span>
+      Live
+    </span>
+  )
+}
+
 /** Exact stock, present only when the backend is in debug mode and we asked for it. */
 export function DebugQuantity({ debug }: { debug?: Debug }) {
   if (!debug) return null

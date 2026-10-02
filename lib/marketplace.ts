@@ -34,7 +34,21 @@ export type StoreOffer = {
   price: number
   availability_bucket: AvailabilityBucket
   last_stock_update_at: string
+  /** Grows with every change at this store; live updates with a version no higher are already reflected. */
+  version: number
   debug?: Debug
+}
+
+/** One store's change to a product, from the live stream. Never an exact quantity. */
+export type OfferUpdate = {
+  catalog_key: string
+  store_id: string
+  price: number
+  availability_bucket: AvailabilityBucket
+  /** False once customers can no longer find the product at the store. */
+  searchable: boolean
+  last_stock_update_at: string
+  version: number
 }
 
 export type SearchProduct = Product & { stores: StoreOffer[] }
@@ -106,6 +120,7 @@ export type StoreProduct = Product & {
   price: number
   availability_bucket: AvailabilityBucket
   last_stock_update_at: string
+  version: number
   debug?: Debug
 }
 
@@ -218,6 +233,12 @@ export function productPath(catalogKey: string, area: Area, sort: Sort): string 
   return `/api/marketplace/products/${encodeURIComponent(catalogKey)}?${new URLSearchParams({ ...areaParams(area), sort })}`
 }
 
+/** Server-sent events with the product's availability changes, only storeId's if given. */
+export function productLivePath(catalogKey: string, storeId?: string): string {
+  const query = storeId ? `?${new URLSearchParams({ store_id: storeId })}` : ''
+  return `/api/marketplace/products/${encodeURIComponent(catalogKey)}/live${query}`
+}
+
 export function storePath(storeId: string): string {
   return `/api/marketplace/stores/${encodeURIComponent(storeId)}`
 }
@@ -285,6 +306,46 @@ export function lowestPrice(stores: StoreOffer[]): number | null {
   const available = stores.filter((s) => s.availability_bucket !== 'OUT')
   const pool = available.length ? available : stores
   return pool.length ? Math.min(...pool.map((s) => s.price)) : null
+}
+
+// The backend's store order for each sort (marketplace storeOrder).
+const storeOrder: Record<Sort, (a: StoreOffer, b: StoreOffer) => number> = {
+  nearest: (a, b) => Number(a.availability_bucket === 'OUT') - Number(b.availability_bucket === 'OUT') || a.distance_m - b.distance_m,
+  cheapest: (a, b) =>
+    Number(a.availability_bucket === 'OUT') - Number(b.availability_bucket === 'OUT') || a.price - b.price || a.distance_m - b.distance_m,
+  availability: (a, b) => bucketRank[a.availability_bucket] - bucketRank[b.availability_bucket] || a.distance_m - b.distance_m,
+}
+
+function compareStoreIds(a: StoreOffer, b: StoreOffer): number {
+  return a.store_id < b.store_id ? -1 : a.store_id > b.store_id ? 1 : 0
+}
+
+/**
+ * Applies live updates newer than the stores' own versions, drops stores that
+ * stopped listing the product and restores sort order. Returns stores itself
+ * when nothing applies.
+ */
+export function mergeOfferUpdates(stores: StoreOffer[], updates: ReadonlyMap<string, OfferUpdate>, sort: Sort): StoreOffer[] {
+  let changed = false
+  const merged: StoreOffer[] = []
+  for (const offer of stores) {
+    const u = updates.get(offer.store_id)
+    if (!u || u.version <= offer.version) {
+      merged.push(offer)
+      continue
+    }
+    changed = true
+    if (!u.searchable) continue
+    merged.push({
+      ...offer,
+      price: u.price,
+      availability_bucket: u.availability_bucket,
+      last_stock_update_at: u.last_stock_update_at,
+      version: u.version,
+    })
+  }
+  if (!changed) return stores
+  return merged.sort((a, b) => storeOrder[sort](a, b) || compareStoreIds(a, b))
 }
 
 export function nearestDistance(stores: StoreOffer[]): number | null {

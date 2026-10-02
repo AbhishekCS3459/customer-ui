@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { Clock, RefreshCw, ShoppingBag } from 'lucide-react'
 
 import { useApi } from '@/hooks/use-api'
+import { useLiveOffers } from '@/hooks/use-live-offers'
 import {
   type AvailabilityBucket,
   type Store,
@@ -19,7 +20,7 @@ import {
 } from '@/lib/marketplace'
 import { cn } from '@/lib/utils'
 import { BackButton, PageShell } from './app-shell'
-import { AvailabilityBadge, DebugQuantity, Notice, ProductImage, Spinner } from './shared'
+import { AvailabilityBadge, DebugQuantity, LiveIndicator, Notice, ProductImage, Spinner } from './shared'
 import { StoreCard } from './store-card'
 
 const bucketHelp: Record<AvailabilityBucket, string> = {
@@ -32,14 +33,30 @@ const bucketHelp: Record<AvailabilityBucket, string> = {
 export function StoreProductPage({ storeId, catalogKey }: { storeId: string; catalogKey: string }) {
   // Bumping the nonce refetches; the API reads the primary database, so this is always current.
   const [nonce, setNonce] = useState(0)
-  const product = useApi<StoreProduct>(storeProductPath(storeId, catalogKey), nonce)
+  const live = useLiveOffers(catalogKey, {
+    storeId,
+    // Listing changes decide between the product and "not available": fetch it again.
+    needsSnapshot: (u) => (product.error?.status === 404 ? u.searchable : !u.searchable),
+  })
+  const product = useApi<StoreProduct>(storeProductPath(storeId, catalogKey), nonce + live.revision)
   const store = useApi<Store>(storePath(storeId))
-  const shown = product.data ?? product.previous
+  const fetched = product.data ?? product.previous
+  const update = live.updates.get(storeId)
+  const shown =
+    fetched && update?.searchable && update.version > fetched.version
+      ? {
+          ...fetched,
+          price: update.price,
+          availability_bucket: update.availability_bucket,
+          last_stock_update_at: update.last_stock_update_at,
+          version: update.version,
+        }
+      : fetched
 
   return (
     <PageShell>
       <BackButton />
-      {product.error ? (
+      {product.error && !shown ? (
         product.error.status === 404 ? (
           <Notice title="Not available at this store">
             <p>This store doesn&apos;t list this product right now.</p>
@@ -85,6 +102,7 @@ export function StoreProductPage({ storeId, catalogKey }: { storeId: string; cat
                   <Clock className="size-4 text-ink-faint" aria-hidden />
                   Stock updated {timeAgo(shown.last_stock_update_at)} · {formatDateTime(shown.last_stock_update_at)}
                 </span>
+                <LiveIndicator connected={live.connected} />
                 <button
                   type="button"
                   onClick={() => setNonce((n) => n + 1)}

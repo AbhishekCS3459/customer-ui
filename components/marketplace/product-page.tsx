@@ -6,6 +6,7 @@ import { ChevronRight, Navigation, Store as StoreIcon } from 'lucide-react'
 
 import { useApi } from '@/hooks/use-api'
 import { setArea, useArea } from '@/hooks/use-area'
+import { useLiveOffers } from '@/hooks/use-live-offers'
 import { cn } from '@/lib/utils'
 import {
   type ProductNearby,
@@ -20,23 +21,29 @@ import {
   formatRadius,
   homeHref,
   lowestPrice,
+  mergeOfferUpdates,
   productPath,
   storeProductHref,
   timeAgo,
 } from '@/lib/marketplace'
 import { BackButton, PageShell, areaLabel } from './app-shell'
-import { AvailabilityBadge, DebugQuantity, Notice, ProductImage, SortPicker, Spinner } from './shared'
+import { AvailabilityBadge, DebugQuantity, LiveIndicator, Notice, ProductImage, SortPicker, Spinner } from './shared'
 
 export function ProductPage({ catalogKey }: { catalogKey: string }) {
   const area = useArea()
   const [sort, setSort] = useState<Sort>('nearest')
-  const product = useApi<ProductNearby>(area ? productPath(catalogKey, area, sort) : null)
+  const live = useLiveOffers(catalogKey, {
+    // A store the list doesn't show may now belong in it, if it is within the radius.
+    needsSnapshot: (u) => u.searchable && !!shown && !shown.stores.some((s) => s.store_id === u.store_id),
+  })
+  const product = useApi<ProductNearby>(area ? productPath(catalogKey, area, sort) : null, live.revision)
   const shown = product.data ?? product.previous
+  const stores = shown ? mergeOfferUpdates(shown.stores, live.updates, shown.sort) : []
 
   return (
     <PageShell>
       <BackButton />
-      {product.error ? (
+      {product.error && !shown ? (
         product.error.status === 404 ? (
           <Notice title="Product not found">
             <p>No store lists this product right now.</p>
@@ -59,27 +66,29 @@ export function ProductPage({ catalogKey }: { catalogKey: string }) {
               {shown.category_path && <p className="text-xs font-medium text-brand">{shown.category_path}</p>}
               <h1 className="mt-2 text-2xl leading-tight font-black tracking-tight sm:text-4xl">{shown.name}</h1>
               <p className="mt-2 text-ink-soft">{[shown.brand, shown.unit].filter(Boolean).join(' · ')}</p>
-              <Summary product={shown} />
+              <Summary stores={stores} />
             </div>
           </section>
 
           <section className="mt-10">
             <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
               <div>
-                <h2 className="text-xl font-bold tracking-tight sm:text-2xl">Compare stores</h2>
+                <h2 className="flex items-center gap-3 text-xl font-bold tracking-tight sm:text-2xl">
+                  Compare stores <LiveIndicator connected={live.connected} />
+                </h2>
                 <p className="text-sm text-ink-soft">
                   Within {formatRadius(area.radiusM)} of {areaLabel(area)}
                 </p>
               </div>
-              {shown.stores.length > 1 && <SortPicker value={sort} onChange={setSort} />}
+              {stores.length > 1 && <SortPicker value={sort} onChange={setSort} />}
             </div>
-            {shown.stores.length === 0 ? (
+            {stores.length === 0 ? (
               <NoStoresNearby radiusM={area.radiusM} onWiden={(radiusM) => setArea({ ...area, radiusM })} />
             ) : (
-              <ul className={cn('flex flex-col gap-3 transition-opacity', product.loading && 'opacity-60')}>
-                {shown.stores.map((offer, i) => (
+              <ul className={cn('flex flex-col gap-3 transition-opacity', product.loading && !product.refreshing && 'opacity-60')}>
+                {stores.map((offer, i) => (
                   <li key={offer.store_id}>
-                    <OfferRow offer={offer} catalogKey={shown.catalog_key} highlight={i === 0 && shown.stores.length > 1 && offer.availability_bucket !== 'OUT'} sort={sort} />
+                    <OfferRow offer={offer} catalogKey={shown.catalog_key} highlight={i === 0 && stores.length > 1 && offer.availability_bucket !== 'OUT'} sort={shown.sort} />
                   </li>
                 ))}
               </ul>
@@ -91,9 +100,9 @@ export function ProductPage({ catalogKey }: { catalogKey: string }) {
   )
 }
 
-function Summary({ product }: { product: ProductNearby }) {
-  const price = lowestPrice(product.stores)
-  const count = product.stores.length
+function Summary({ stores }: { stores: StoreOffer[] }) {
+  const price = lowestPrice(stores)
+  const count = stores.length
   if (count === 0) return null
   return (
     <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 rounded-2xl bg-canvas p-4">
@@ -104,7 +113,7 @@ function Summary({ product }: { product: ProductNearby }) {
         </div>
       )}
       <div className="space-y-1">
-        <AvailabilityBadge bucket={bestBucket(product.stores)} />
+        <AvailabilityBadge bucket={bestBucket(stores)} />
         <p className="text-sm text-ink-soft">
           Sold by {count} {count === 1 ? 'store' : 'stores'} near you
         </p>
