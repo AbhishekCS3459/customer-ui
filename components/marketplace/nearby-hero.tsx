@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
-import { ChevronLeft, ChevronRight, MapPinned, Store as StoreIcon } from 'lucide-react'
+import { ChevronLeft, ChevronRight, MapPinned, Navigation, Store as StoreIcon } from 'lucide-react'
 
 import { useApi } from '@/hooks/use-api'
 import { setArea } from '@/hooks/use-area'
@@ -161,6 +161,9 @@ function MapLegend({ loading }: { loading: boolean }) {
       <span className={item}>
         <span className="size-2.5 rounded-full bg-zinc-400 ring-2 ring-white" /> Closed
       </span>
+      <span className={cn(item, 'max-sm:hidden')}>
+        <span className="grid size-4 place-items-center rounded-full bg-white text-[8px] font-black text-ink ring-2 ring-brand">3</span> Group
+      </span>
       {loading && <span className="size-2.5 animate-spin rounded-full border-2 border-brand border-t-transparent" aria-label="Loading stores" />}
     </div>
   )
@@ -298,6 +301,7 @@ function NearbyStoreCard({
   onHover: (id: string | null) => void
 }) {
   const nearness = Math.max(4, Math.min(100, (store.distance_m / radiusM) * 100))
+  const warm = number % 2 === 0
   return (
     <Link
       href={storeHref(store.id)}
@@ -306,12 +310,17 @@ function NearbyStoreCard({
       onFocus={() => onHover(store.id)}
       onBlur={() => onHover(null)}
       className={cn(
-        'group flex h-full flex-col overflow-hidden rounded-3xl border bg-surface transition duration-200 hover:-translate-y-0.5 hover:shadow-lift',
-        active ? 'border-brand shadow-lift ring-2 ring-brand/25' : 'border-line shadow-card',
-        !store.is_open && 'opacity-80',
+        'group flex h-full flex-col rounded-[1.5rem] border bg-surface p-2.5 transition duration-300 hover:-translate-y-1 hover:shadow-lift',
+        active ? 'border-brand/50 shadow-lift ring-4 ring-brand/15' : 'border-line shadow-card',
+        !store.is_open && 'opacity-85',
       )}
     >
-      <div className="relative h-28 overflow-hidden bg-linear-to-br from-brand-soft to-[#f7efe4]">
+      <div
+        className={cn(
+          'relative h-32 overflow-hidden rounded-2xl bg-linear-to-br',
+          warm ? 'from-[#fbf6ee] to-[#f0e8da]' : 'from-[#eef5ef] to-[#dde9de]',
+        )}
+      >
         {store.cover_image_url ? (
           // Store photos come from many hosts; next.config has images.unoptimized.
           // eslint-disable-next-line @next/next/no-img-element
@@ -322,55 +331,71 @@ function NearbyStoreCard({
             className={cn('h-full w-full object-cover transition duration-500 group-hover:scale-105', !store.is_open && 'grayscale')}
           />
         ) : (
-          <div className="grid h-full place-items-center">
-            <span className="text-4xl font-black text-brand/25">{store.name.charAt(0).toUpperCase()}</span>
-          </div>
+          <>
+            <div
+              className={cn(
+                'absolute inset-0 [background-size:10px_10px] opacity-25',
+                warm
+                  ? 'bg-[radial-gradient(var(--color-accent)_1px,transparent_1px)]'
+                  : 'bg-[radial-gradient(var(--color-brand)_1px,transparent_1px)]',
+              )}
+              aria-hidden
+            />
+            <span
+              className={cn(
+                'absolute -right-1 -bottom-8 text-[7.5rem] leading-none font-black transition duration-500 group-hover:-translate-y-1 group-hover:scale-110',
+                warm ? 'text-accent/15' : 'text-brand/15',
+              )}
+              aria-hidden
+            >
+              {store.name.charAt(0).toUpperCase()}
+            </span>
+          </>
         )}
         <span
           className={cn(
-            'absolute top-3 left-3 grid size-7 place-items-center rounded-full text-xs font-black text-white ring-2 ring-white',
+            'absolute top-3 left-3 grid size-8 place-items-center rounded-xl text-xs font-black text-white shadow-card ring-2 ring-white',
             store.is_open ? 'bg-brand' : 'bg-zinc-400',
           )}
           aria-hidden
         >
           {number}
         </span>
-        <span
-          className={cn(
-            'absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-bold ring-1 ring-inset',
-            store.is_open ? 'bg-emerald-50 text-emerald-800 ring-emerald-200' : 'bg-zinc-100 text-zinc-600 ring-zinc-200',
-          )}
-        >
-          <span className={cn('size-1.5 rounded-full', store.is_open ? 'bg-emerald-500' : 'bg-zinc-400')} aria-hidden />
+        <span className="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-black tracking-wider text-ink uppercase shadow-card backdrop-blur-sm">
+          <span className="relative flex size-1.5" aria-hidden>
+            {store.is_open && <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75 motion-reduce:animate-none" />}
+            <span className={cn('relative inline-flex size-1.5 rounded-full', store.is_open ? 'bg-emerald-500' : 'bg-zinc-400')} />
+          </span>
           {store.is_open ? 'Open' : store.vacation_until ? 'On holiday' : 'Closed'}
         </span>
       </div>
 
-      <div className="flex flex-1 flex-col p-4">
-        <p className="truncate font-bold text-ink">{store.name}</p>
-        <p className="mt-0.5 truncate text-xs text-ink-soft">{[store.category, store.city].filter(Boolean).join(' · ')}</p>
+      <div className="flex flex-1 flex-col px-2 pt-3.5 pb-1">
+        <p className="truncate text-[15px] font-black tracking-tight text-ink transition-colors group-hover:text-brand">{store.name}</p>
+        <p className="mt-0.5 truncate text-xs font-medium text-ink-faint">{[store.category, store.city].filter(Boolean).join(' · ')}</p>
 
-        <div className="mt-3 flex items-center gap-2 text-xs font-semibold text-ink">
-          <span className="tabular-nums">{formatDistance(store.distance_m)}</span>
+        <div className="mt-3 mb-3.5 flex items-center gap-2.5">
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-canvas px-2 py-1 text-[11px] font-bold text-ink tabular-nums">
+            <Navigation className="size-3 fill-brand text-brand" aria-hidden />
+            {formatDistance(store.distance_m)}
+          </span>
           <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-canvas" aria-hidden>
-            <span className="block h-full rounded-full bg-brand/70" style={{ width: `${nearness}%` }} />
+            <span className="block h-full rounded-full bg-linear-to-r from-brand to-emerald-400" style={{ width: `${nearness}%` }} />
           </span>
         </div>
 
-        <p className="mt-3 text-xs text-ink-soft">
-          {store.is_open ? (
-            store.product_count > 0 ? (
-              <>
-                <span className="font-semibold text-ink">{store.product_count}</span> {store.product_count === 1 ? 'product' : 'products'} ·{' '}
-                <span className="font-semibold text-emerald-700">{store.available_count} in stock</span>
-              </>
-            ) : (
-              'Nothing listed yet'
-            )
+        <div className="mt-auto flex items-center justify-between gap-2 border-t border-dashed border-line pt-3 text-xs">
+          {store.is_open && store.product_count > 0 ? (
+            <>
+              <span className="text-ink-soft">
+                <span className="font-black text-ink">{store.product_count}</span> {store.product_count === 1 ? 'product' : 'products'}
+              </span>
+              <span className="rounded-full bg-brand-soft px-2.5 py-1 text-[11px] font-bold text-brand">{store.available_count} in stock</span>
+            </>
           ) : (
-            'Closed right now'
+            <span className="py-1 font-medium text-ink-faint">{store.is_open ? 'Nothing listed yet' : 'Closed right now'}</span>
           )}
-        </p>
+        </div>
       </div>
     </Link>
   )
@@ -378,13 +403,13 @@ function NearbyStoreCard({
 
 function StoreCardSkeleton() {
   return (
-    <div className="w-64 shrink-0 overflow-hidden rounded-3xl border border-line bg-surface sm:w-72">
-      <div className="h-28 animate-pulse bg-canvas" />
-      <div className="p-4">
+    <div className="w-64 shrink-0 rounded-[1.5rem] border border-line bg-surface p-2.5 sm:w-72">
+      <div className="h-32 animate-pulse rounded-2xl bg-canvas" />
+      <div className="px-2 pt-3.5 pb-1">
         <div className="h-4 w-3/4 animate-pulse rounded bg-canvas" />
         <div className="mt-2 h-3 w-1/2 animate-pulse rounded bg-canvas" />
-        <div className="mt-4 h-2 w-full animate-pulse rounded bg-canvas" />
-        <div className="mt-4 h-3 w-2/3 animate-pulse rounded bg-canvas" />
+        <div className="mt-4 h-5 w-full animate-pulse rounded bg-canvas" />
+        <div className="mt-4 h-6 w-full animate-pulse rounded bg-canvas" />
       </div>
     </div>
   )

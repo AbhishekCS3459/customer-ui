@@ -95,10 +95,13 @@ html {
   font-family: var(--font-sans);
 }
 
-button,
-input,
-select {
-  font: inherit;
+/* In the base layer so font utilities on buttons and inputs still win. */
+@layer base {
+  button,
+  input,
+  select {
+    font: inherit;
+  }
 }
 
 button:not(:disabled),

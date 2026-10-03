@@ -4,10 +4,15 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { type FormEvent, type ReactNode, useState } from 'react'
 import { Dialog } from '@base-ui/react/dialog'
-import { ArrowLeft, ChevronDown, Crosshair, Loader2, MapPin, Search, X } from 'lucide-react'
+import { Menu } from '@base-ui/react/menu'
+import { Toast } from '@base-ui/react/toast'
+import { ArrowLeft, ChevronDown, Crosshair, Loader2, LogOut, MapPin, Search, UserRound, X } from 'lucide-react'
 
 import { setArea, useArea } from '@/hooks/use-area'
+import { endSession, useSession } from '@/hooks/use-session'
+import { type Session, displayName, initials } from '@/lib/auth'
 import { type Area, DEFAULT_AREA, MAX_QUERY_LENGTH, MIN_QUERY_LENGTH, formatRadius, homeHref, validLatLng } from '@/lib/marketplace'
+import { AuthDialog } from './auth-dialog'
 import { RadiusPicker } from './shared'
 
 export function PageShell({ query, children }: { query?: string; children: ReactNode }) {
@@ -73,9 +78,92 @@ function AppHeader({ query = '' }: { query?: string }) {
           </span>
           <ChevronDown className="size-4 shrink-0 text-ink-faint" aria-hidden />
         </button>
+
+        <div className="order-2 shrink-0 lg:order-4">
+          <AccountButton />
+        </div>
       </div>
       {area && <LocationDialog open={locationOpen} onOpenChange={setLocationOpen} area={area} />}
     </header>
+  )
+}
+
+function AccountButton() {
+  const session = useSession()
+  const [signInOpen, setSignInOpen] = useState(false)
+
+  // Holds the space while the stored session is read, so the header doesn't jump.
+  if (session === undefined) return <span className="block size-10 rounded-full bg-canvas" aria-hidden />
+  if (session) return <AccountMenu session={session} />
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setSignInOpen(true)}
+        aria-label="Sign in"
+        className="flex h-10 items-center gap-2 rounded-full bg-ink px-3 text-sm font-bold text-white shadow-card transition hover:bg-brand-strong sm:px-4"
+      >
+        <UserRound className="size-4" aria-hidden />
+        <span className="max-sm:hidden">Sign In</span>
+      </button>
+      <AuthDialog open={signInOpen} onOpenChange={setSignInOpen} />
+    </>
+  )
+}
+
+function Avatar({ session, className }: { session: Session; className?: string }) {
+  const { user } = session
+  return user.avatar_url ? (
+    // Avatars come from many hosts; next.config has images.unoptimized.
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={user.avatar_url} alt="" className={`rounded-full object-cover ${className ?? ''}`} />
+  ) : (
+    <span className={`grid place-items-center rounded-full bg-linear-to-br from-brand to-brand-strong font-black text-white ${className ?? ''}`}>
+      {initials(user)}
+    </span>
+  )
+}
+
+function AccountMenu({ session }: { session: Session }) {
+  const toasts = Toast.useToastManager()
+  const { user } = session
+
+  function signOut() {
+    endSession()
+    toasts.add({ type: 'success', title: 'Signed out', description: 'See you again soon.' })
+  }
+
+  return (
+    <Menu.Root>
+      <Menu.Trigger
+        aria-label={`Account: ${displayName(user)}`}
+        className="flex items-center gap-2 rounded-full p-0.5 transition hover:bg-canvas data-[popup-open]:bg-canvas sm:pr-2.5"
+      >
+        <Avatar session={session} className="size-9 text-sm ring-2 ring-white shadow-card" />
+        <span className="max-w-28 truncate text-sm font-bold max-sm:hidden">{displayName(user)}</span>
+        <ChevronDown className="size-4 text-ink-faint max-sm:hidden" aria-hidden />
+      </Menu.Trigger>
+      <Menu.Portal>
+        <Menu.Positioner sideOffset={8} align="end" className="z-50">
+          <Menu.Popup className="w-64 origin-(--transform-origin) rounded-2xl bg-surface p-1.5 shadow-lift ring-1 ring-line transition data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0">
+            <div className="flex items-center gap-3 px-2.5 py-2.5">
+              <Avatar session={session} className="size-10 shrink-0 text-sm" />
+              <div className="min-w-0">
+                <p className="truncate text-sm font-bold">{user.full_name || displayName(user)}</p>
+                <p className="truncate text-xs text-ink-faint">{user.phone || user.email}</p>
+              </div>
+            </div>
+            <Menu.Separator className="mx-2 my-1 h-px bg-line" />
+            <Menu.Item
+              onClick={signOut}
+              className="flex cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm font-semibold text-red-700 outline-none data-[highlighted]:bg-red-50"
+            >
+              <LogOut className="size-4" aria-hidden /> Sign out
+            </Menu.Item>
+          </Menu.Popup>
+        </Menu.Positioner>
+      </Menu.Portal>
+    </Menu.Root>
   )
 }
 

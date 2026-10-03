@@ -79,12 +79,12 @@ export function Spinner({ label = 'Loading…' }: { label?: string }) {
 export function ProductCardSkeleton() {
   return (
     <div className="flex flex-col rounded-3xl border border-line bg-surface p-2.5 sm:p-3" aria-hidden>
-      <div className="aspect-square animate-pulse rounded-2xl bg-canvas" />
+      <div className="h-36 animate-pulse rounded-2xl bg-canvas sm:h-40" />
       <div className="mt-3 px-1">
         <div className="h-3 w-1/3 animate-pulse rounded bg-canvas" />
         <div className="mt-2 h-4 w-4/5 animate-pulse rounded bg-canvas" />
         <div className="mt-1.5 h-3 w-1/4 animate-pulse rounded bg-canvas" />
-        <div className="mt-4 flex items-end justify-between">
+        <div className="mt-4 flex items-end justify-between border-t border-dashed border-line pt-3">
           <div className="h-5 w-1/3 animate-pulse rounded bg-canvas" />
           <div className="h-3 w-1/4 animate-pulse rounded bg-canvas" />
         </div>

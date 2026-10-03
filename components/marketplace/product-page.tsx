@@ -129,18 +129,26 @@ function OfferRow({ offer, catalogKey, highlight, sort }: { offer: StoreOffer; c
   return (
     <div
       className={cn(
-        'flex items-center gap-3 rounded-3xl border bg-surface p-3 shadow-card sm:gap-4 sm:p-4',
-        highlight ? 'border-brand/40 ring-1 ring-brand/20' : 'border-line',
+        'relative flex items-center gap-3 rounded-3xl border p-3 shadow-card transition hover:shadow-lift sm:gap-4 sm:p-4',
+        highlight ? 'mt-3 border-brand/40 bg-linear-to-r from-brand-soft/70 to-surface ring-4 ring-brand/10' : 'border-line bg-surface',
       )}
     >
-      <div className="hidden size-11 shrink-0 place-items-center rounded-2xl bg-brand-soft text-brand sm:grid">
-        <StoreIcon className="size-5" aria-hidden />
+      {highlight && (
+        <span className="absolute -top-2.5 left-5 rounded-full bg-brand px-2.5 py-0.5 text-[10px] font-black tracking-wider text-white uppercase shadow-card">
+          Best match · {highlightLabel[sort]}
+        </span>
+      )}
+      <div
+        className={cn(
+          'hidden size-12 shrink-0 place-items-center rounded-2xl text-lg font-black sm:grid',
+          highlight ? 'bg-brand text-white' : 'bg-brand-soft text-brand',
+        )}
+        aria-hidden
+      >
+        {offer.store_name.charAt(0).toUpperCase() || <StoreIcon className="size-5" />}
       </div>
       <Link href={storeProductHref(offer.store_id, catalogKey)} className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="truncate font-semibold hover:underline">{offer.store_name}</span>
-          {highlight && <span className="rounded-full bg-brand px-2 py-0.5 text-[10px] font-bold tracking-wide text-white uppercase">{highlightLabel[sort]}</span>}
-        </div>
+        <span className="block truncate font-black tracking-tight hover:underline">{offer.store_name}</span>
         <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-soft">
           <span>{formatDistance(offer.distance_m)} away</span>
           <span aria-hidden>·</span>
@@ -151,7 +159,9 @@ function OfferRow({ offer, catalogKey, highlight, sort }: { offer: StoreOffer; c
           <DebugQuantity debug={offer.debug} />
         </div>
       </Link>
-      <div className={cn('text-right text-lg font-bold sm:text-xl', out && 'text-ink-faint')}>{formatPrice(offer.price)}</div>
+      <div className={cn('text-right text-lg font-black tracking-tight sm:text-xl', out ? 'text-ink-faint' : highlight && 'text-brand-strong')}>
+        {formatPrice(offer.price)}
+      </div>
       <a
         href={directionsUrl(offer.lat, offer.lng)}
         target="_blank"

@@ -41,6 +41,9 @@ importers:
       shadcn:
         specifier: ^4.11.0
         version: 4.19.0(typescript@5.7.3)
+      supercluster:
+        specifier: ^9.1.0
+        version: 9.1.0
       tailwind-merge:
         specifier: ^3.3.1
         version: 3.4.0
@@ -1255,6 +1258,9 @@ packages:
   jsonfile@6.2.1:
     resolution: {integrity: sha512-zwOTdL3rFQ/lRdBnntKVOX6k5cKJwEc1HdilT71BWEu7J41gXIB2MRp+vxduPSwZJPWBxEzv4yH1wYLJGUHX4Q==}
 
+  kdbush@4.1.0:
+    resolution: {integrity: sha512-e9vurzrXJQrFX6ckpHP3bvj5l+9CnYzkxDNnNQ1h2QTqdWsUAJgXiKdGNcOa1EY85dU8KbQ+z/FdQdB7P+9yfQ==}
+
   kleur@3.0.3:
     resolution: {integrity: sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==}
     engines: {node: '>=6'}
@@ -1768,6 +1774,9 @@ packages:
         optional: true
       babel-plugin-macros:
         optional: true
+
+  supercluster@9.1.0:
+    resolution: {integrity: sha512-WMhsJPm8Tf9f5mKxJ1D0mB5tbCMOFi8wTrm/LGnsJHGg8xkeNT/TWDZuFauOGRISnclbYgnxD7g3xJAfQO3FLg==}
 
   tailwind-merge@3.4.0:
     resolution: {integrity: sha512-uSaO4gnW+b3Y2aWoWfFpX62vn2sR3skfhbjsEnaBI81WD1wBLlHZe5sWf0AqjksNdYTbGBEd0UasQMT3SNV15g==}
@@ -2952,6 +2961,8 @@ snapshots:
     optionalDependencies:
       graceful-fs: 4.2.11
 
+  kdbush@4.1.0: {}
+
   kleur@3.0.3: {}
 
   kleur@4.1.5: {}
@@ -3478,6 +3489,11 @@ snapshots:
       react: 19.2.4
     optionalDependencies:
       '@babel/core': 7.29.7
+
+  supercluster@9.1.0:
+    dependencies:
+      '@types/geojson': 7946.0.16
+      kdbush: 4.1.0
 
   tailwind-merge@3.4.0: {}
 

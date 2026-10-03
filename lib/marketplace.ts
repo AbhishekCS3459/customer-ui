@@ -167,19 +167,26 @@ export async function apiGet<T>(path: string, signal?: AbortSignal): Promise<T> 
     })
   } catch (err) {
     if (signal?.aborted) throw err
-    throw new ApiError(0, `Can't reach the marketplace${API_URL ? ` at ${API_URL}` : ''}. Is the backend running?`)
+    throw unreachable()
   }
-  if (!res.ok) {
-    let message = res.status === 429 ? 'Too many requests; wait a moment and try again.' : `Request failed (${res.status})`
-    try {
-      const body: unknown = await res.json()
-      if (body && typeof body === 'object' && 'error' in body && typeof body.error === 'string') message = body.error
-    } catch {
-      // Not JSON (e.g. the rate limiter's plain-text reply); keep the default message.
-    }
-    throw new ApiError(res.status, message)
-  }
+  if (!res.ok) throw await apiError(res)
   return (await res.json()) as T
+}
+
+export function unreachable(): ApiError {
+  return new ApiError(0, `Can't reach the marketplace${API_URL ? ` at ${API_URL}` : ''}. Is the backend running?`)
+}
+
+/** The backend's error message for a failed response, or a generic one. */
+export async function apiError(res: Response): Promise<ApiError> {
+  let message = res.status === 429 ? 'Too many requests; wait a moment and try again.' : `Request failed (${res.status})`
+  try {
+    const body: unknown = await res.json()
+    if (body && typeof body === 'object' && 'error' in body && typeof body.error === 'string') message = body.error
+  } catch {
+    // Not JSON (e.g. the rate limiter's plain-text reply); keep the default message.
+  }
+  return new ApiError(res.status, message)
 }
 
 // Area: where the customer is shopping. Remembered in this browser.
