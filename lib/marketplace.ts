@@ -1,6 +1,7 @@
 // Client for the public marketplace API (backend internal/marketplace).
-// Nothing here needs a login; responses never contain exact quantities unless
-// the backend runs with DEBUG_MARKETPLACE=true and we send X-Debug: 1.
+// Nothing here needs a login; responses never contain exact quantities, only
+// how many a customer can order (max_order_quantity, at most 10), unless the
+// backend runs with DEBUG_MARKETPLACE=true and we send X-Debug: 1.
 
 // Empty means same-origin /api, which next.config.mjs proxies to BACKEND_URL.
 export const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/+$/, '')
@@ -33,6 +34,8 @@ export type StoreOffer = {
   lng: number
   price: number
   availability_bucket: AvailabilityBucket
+  /** How many a customer can order here now, at most MAX_ORDER_QUANTITY. */
+  max_order_quantity: number
   last_stock_update_at: string
   /** Grows with every change at this store; live updates with a version no higher are already reflected. */
   version: number
@@ -45,6 +48,7 @@ export type OfferUpdate = {
   store_id: string
   price: number
   availability_bucket: AvailabilityBucket
+  max_order_quantity: number
   /** False once customers can no longer find the product at the store. */
   searchable: boolean
   last_stock_update_at: string
@@ -119,6 +123,8 @@ export type StoreProduct = Product & {
   store_id: string
   price: number
   availability_bucket: AvailabilityBucket
+  /** How many a customer can order here now, at most MAX_ORDER_QUANTITY. */
+  max_order_quantity: number
   last_stock_update_at: string
   version: number
   debug?: Debug
@@ -133,6 +139,8 @@ export type StoreProductsPage = {
 // Limits enforced by the backend; the UI mirrors them to fail early.
 export const MIN_QUERY_LENGTH = 2
 export const MAX_QUERY_LENGTH = 100
+/** Most units of one product per order (availability.MaxOrderQuantity). */
+export const MAX_ORDER_QUANTITY = 10
 export const NEARBY_PAGE_SIZE = 30
 export const DEFAULT_RADIUS_M = 5000
 export const RADIUS_OPTIONS_M = [1000, 2000, 5000, 10000, 20000]
@@ -308,6 +316,17 @@ export function bestBucket(stores: StoreOffer[]): AvailabilityBucket {
   )
 }
 
+/** How many of a store's product a customer can order now. A backend that doesn't say yet allows the cap. */
+export function orderLimit(p: { availability_bucket: AvailabilityBucket; max_order_quantity?: number }): number {
+  if (p.availability_bucket === 'OUT') return 0
+  return Math.max(0, Math.min(p.max_order_quantity ?? MAX_ORDER_QUANTITY, MAX_ORDER_QUANTITY))
+}
+
+/** The store to buy from: the first, in the backend's order for the sort, that has it; else the first. */
+export function bestOffer(stores: StoreOffer[]): StoreOffer | undefined {
+  return stores.find((s) => s.availability_bucket !== 'OUT') ?? stores[0]
+}
+
 /** The lowest price among stores that may have it, or among all when every store is out. */
 export function lowestPrice(stores: StoreOffer[]): number | null {
   const available = stores.filter((s) => s.availability_bucket !== 'OUT')
@@ -347,16 +366,13 @@ export function mergeOfferUpdates(stores: StoreOffer[], updates: ReadonlyMap<str
       ...offer,
       price: u.price,
       availability_bucket: u.availability_bucket,
+      max_order_quantity: u.max_order_quantity,
       last_stock_update_at: u.last_stock_update_at,
       version: u.version,
     })
   }
   if (!changed) return stores
   return merged.sort((a, b) => storeOrder[sort](a, b) || compareStoreIds(a, b))
-}
-
-export function nearestDistance(stores: StoreOffer[]): number | null {
-  return stores.length ? Math.min(...stores.map((s) => s.distance_m)) : null
 }
 
 // Formatting

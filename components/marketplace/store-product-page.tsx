@@ -2,8 +2,9 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { Clock, RefreshCw, ShoppingBag } from 'lucide-react'
+import { Clock, RefreshCw } from 'lucide-react'
 
+import { AddToCart } from '@/components/orders/add-to-cart'
 import { useApi } from '@/hooks/use-api'
 import { useLiveOffers } from '@/hooks/use-live-offers'
 import {
@@ -48,6 +49,7 @@ export function StoreProductPage({ storeId, catalogKey }: { storeId: string; cat
           ...fetched,
           price: update.price,
           availability_bucket: update.availability_bucket,
+          max_order_quantity: update.max_order_quantity,
           last_stock_update_at: update.last_stock_update_at,
           version: update.version,
         }
@@ -112,10 +114,8 @@ export function StoreProductPage({ storeId, catalogKey }: { storeId: string; cat
                   <RefreshCw className={cn('size-4', product.loading && 'animate-spin')} aria-hidden /> Refresh
                 </button>
               </div>
-              <p className="mt-auto flex items-center gap-1.5 pt-6 text-xs text-ink-faint">
-                <ShoppingBag className="size-3.5" aria-hidden /> Buy it at the store. Online ordering isn&apos;t available yet.
-              </p>
-              <Link href={productHref(shown.catalog_key)} className="mt-2 text-sm font-semibold text-brand hover:text-brand-strong">
+              <AddToCart product={shown} store={store.data} />
+              <Link href={productHref(shown.catalog_key)} className="mt-auto pt-6 text-sm font-semibold text-brand hover:text-brand-strong">
                 Compare prices at other stores →
               </Link>
             </div>

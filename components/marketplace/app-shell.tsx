@@ -6,9 +6,10 @@ import { type FormEvent, type ReactNode, useState } from 'react'
 import { Dialog } from '@base-ui/react/dialog'
 import { Menu } from '@base-ui/react/menu'
 import { Toast } from '@base-ui/react/toast'
-import { ArrowLeft, ChevronDown, Crosshair, Loader2, LogOut, MapPin, Search, UserRound, X } from 'lucide-react'
+import { ArrowLeft, ChevronDown, Crosshair, Loader2, LogOut, MapPin, Package, Search, ShoppingBag, UserRound, X } from 'lucide-react'
 
 import { setArea, useArea } from '@/hooks/use-area'
+import { cartCount, useCart } from '@/hooks/use-cart'
 import { endSession, useSession } from '@/hooks/use-session'
 import { type Session, displayName, initials } from '@/lib/auth'
 import { type Area, DEFAULT_AREA, MAX_QUERY_LENGTH, MIN_QUERY_LENGTH, formatRadius, homeHref, validLatLng } from '@/lib/marketplace'
@@ -79,12 +80,31 @@ function AppHeader({ query = '' }: { query?: string }) {
           <ChevronDown className="size-4 shrink-0 text-ink-faint" aria-hidden />
         </button>
 
-        <div className="order-2 shrink-0 lg:order-4">
+        <div className="order-2 flex shrink-0 items-center gap-2 lg:order-4">
+          <BagButton />
           <AccountButton />
         </div>
       </div>
       {area && <LocationDialog open={locationOpen} onOpenChange={setLocationOpen} area={area} />}
     </header>
+  )
+}
+
+function BagButton() {
+  const count = cartCount(useCart())
+  return (
+    <Link
+      href="/cart"
+      aria-label={count ? `Bag, ${count} ${count === 1 ? 'item' : 'items'}` : 'Bag'}
+      className="relative grid size-10 place-items-center rounded-full text-ink transition hover:bg-canvas"
+    >
+      <ShoppingBag className="size-5" aria-hidden />
+      {count > 0 && (
+        <span className="absolute -top-0.5 -right-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-brand px-1 text-[11px] font-bold text-white ring-2 ring-surface tabular-nums">
+          {count > 99 ? '99+' : count}
+        </span>
+      )}
+    </Link>
   )
 }
 
@@ -154,6 +174,12 @@ function AccountMenu({ session }: { session: Session }) {
               </div>
             </div>
             <Menu.Separator className="mx-2 my-1 h-px bg-line" />
+            <Menu.LinkItem
+              render={<Link href="/orders" />}
+              className="flex cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm font-semibold outline-none data-[highlighted]:bg-canvas"
+            >
+              <Package className="size-4" aria-hidden /> My orders
+            </Menu.LinkItem>
             <Menu.Item
               onClick={signOut}
               className="flex cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm font-semibold text-red-700 outline-none data-[highlighted]:bg-red-50"

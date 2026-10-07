@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { type FormEvent, useState } from 'react'
 import { Loader2, Search, Store as StoreIcon, X } from 'lucide-react'
 
+import { QuickAdd } from '@/components/orders/add-to-cart'
 import { useApi } from '@/hooks/use-api'
 import {
   ApiError,
@@ -127,8 +128,9 @@ export function StorePage({ storeId }: { storeId: string }) {
               <>
                 <ul className={productGridClass}>
                   {products.map((p) => (
-                    <li key={p.catalog_key}>
+                    <li key={p.catalog_key} className="relative">
                       <StoreProductCard storeId={storeId} product={p} />
+                      <QuickAdd product={p} store={store.data} className="absolute top-4 right-4 sm:top-5 sm:right-5" />
                     </li>
                   ))}
                 </ul>
