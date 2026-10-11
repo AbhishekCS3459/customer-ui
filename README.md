@@ -27,7 +27,7 @@ pnpm dev
 ```
 
 Open [http://localhost:3002](http://localhost:3002). The default location is
-Koramangala, Bengaluru (12.9352, 77.6245), the marketplace demo seed's test point.
+Gumia, Bokaro (23.78955, 85.8381).
 
 ## Learn More
 

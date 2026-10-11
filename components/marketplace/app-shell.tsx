@@ -290,7 +290,7 @@ function LocationDialog({ open, onOpenChange, area }: { open: boolean; onOpenCha
             onClick={() => choose({ ...area, lat: DEFAULT_AREA.lat, lng: DEFAULT_AREA.lng, label: DEFAULT_AREA.label })}
             className="mt-3 w-full rounded-2xl px-4 py-2 text-sm font-semibold text-brand hover:bg-brand-soft"
           >
-            Use {DEFAULT_AREA.label} (demo)
+            Use {DEFAULT_AREA.label}
           </button>
 
           <div className="mt-5 border-t border-line pt-5">

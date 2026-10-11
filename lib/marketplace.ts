@@ -201,8 +201,8 @@ export async function apiError(res: Response): Promise<ApiError> {
 
 export type Area = { lat: number; lng: number; label?: string; radiusM: number }
 
-/** Koramangala, Bengaluru: the marketplace demo seed's test point. */
-export const DEFAULT_AREA: Area = { lat: 12.9352, lng: 77.6245, label: 'Koramangala, Bengaluru', radiusM: DEFAULT_RADIUS_M }
+/** Gumia, Bokaro: where customers start before choosing a location. */
+export const DEFAULT_AREA: Area = { lat: 23.78955, lng: 85.8381, label: 'Gumia, Bokaro', radiusM: DEFAULT_RADIUS_M }
 
 export const AREA_KEY = 'todayz.area'
 
